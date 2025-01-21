@@ -1,5 +1,5 @@
 const pool = require('../models/db');
-const { createUserSchema } = require('../utils/userSchema');
+const { createUserSchema, getUserFromIdSchema, updateUserSchema, deleteUserSchema } = require('../utils/userSchema');
 // Creazione di un nuovo utente
 exports.createUser = async (req, res) => {
     try {
@@ -44,6 +44,11 @@ exports.getAllUsers = async (req, res) => {
 // Recupera un utente specifico per ID
 exports.getUserById = async (req, res) => {
     try {
+        const { error, value } = getUserFromIdSchema.validate(req.query, { abortEarly: false });
+        if (error) {
+            return res.error(400, { errors: error.details.map((err) => err.message) });
+        }
+
         const { id } = req.params;
         const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [id]);
         if (rows.length === 0) {
@@ -58,11 +63,14 @@ exports.getUserById = async (req, res) => {
 // Aggiorna un utente
 exports.updateUser = async (req, res) => {
     try {
+
+
         const { id } = req.params;
         const { nickname, age, city } = req.body;
 
-        if (!nickname && !age && !city) {
-            return res.error(400, { error: 'At least one field (nickname, age, or city) is required to update' });
+        const { error, value } = updateSchema.validate({ nickname, age, city }, { abortEarly: false });
+        if (error) {
+            return res.error(400, { errors: error.details.map((err) => err.message) });
         }
 
         const updates = [];
@@ -73,9 +81,6 @@ exports.updateUser = async (req, res) => {
             params.push(nickname);
         }
         if (age) {
-            if (isNaN(age) || age <= 0) {
-                return res.error(400, { error: 'Age must be a positive number' });
-            }
             updates.push('age = ?');
             params.push(age);
         }
@@ -103,16 +108,23 @@ exports.updateUser = async (req, res) => {
 // Elimina un utente
 exports.deleteUser = async (req, res) => {
     try {
+        const { error, value } = deleteUserSchema.validate(req.params, { abortEarly: false });
+        if (error) {
+            return res.error(400, { errors: error.details.map((err) => err.message) });
+        }
+
+
         const { id } = req.params;
         const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [id]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.error(404, 'User not found', { internalError: error.message });
+
         }
 
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
         console.error('Error deleting user:', error);
-        res.status(500).json({ error: 'Failed to delete user' });
+        res.error(500, 'Failed to delete user', { internalError: error.message });
     }
 };

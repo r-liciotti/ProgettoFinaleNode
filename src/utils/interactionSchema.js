@@ -1,42 +1,23 @@
 const Joi = require('joi');
 
+const getInteractionByIdSchema = Joi.object({
+    id: Joi.number().integer().positive().required()
+});
+
+
 const createInteractionSchema = Joi.object({
-    postId: Joi.number().integer().positive().required().messages({
-        "number.base": "L'ID del post deve essere un numero.",
-        "number.integer": "L'ID del post deve essere un numero intero.",
-        "number.positive": "L'ID del post deve essere un numero positivo."
-    }),
-    userId: Joi.number().integer().positive().required().messages({
-        "number.base": "L'ID dell'utente deve essere un numero.",
-        "number.integer": "L'ID dell'utente deve essere un numero intero.",
-        "number.positive": "L'ID dell'utente deve essere un numero positivo."
-    }),
-    type: Joi.string().valid('like', 'comment').required().messages({
-        "string.base": "Il tipo dell'interazione deve essere una stringa.",
-        "string.valid": "Il tipo dell'interazione deve essere 'like' o 'comment'.",
-        "any.required": "Il tipo dell'interazione é obbligatorio."
-    })
+    postId: Joi.number().integer().positive().required(),
+    userId: Joi.number().integer().positive().required(),
+    type: Joi.string().valid('like', 'comment').required()
 });
 
 const updateInteractionSchema = Joi.object({
-    id: Joi.number().integer().positive().required().messages({
-        "number.base": "L'ID dell'interazione deve essere un numero.",
-        "number.integer": "L'ID dell'interazione deve essere un numero intero.",
-        "number.positive": "L'ID dell'interazione deve essere un numero positivo."
-    }),
-    type: Joi.string().valid('like', 'comment').required().messages({
-        "string.base": "Il tipo dell'interazione deve essere una stringa.",
-        "string.valid": "Il tipo dell'interazione deve essere 'like' o 'comment'.",
-        "any.required": "Il tipo dell'interazione é obbligatorio."
-    })
+    id: Joi.number().integer().positive().required(),
+    type: Joi.string().valid('like', 'comment').required()
 });
 
 const deleteInteractionSchema = Joi.object({
-    id: Joi.number().integer().positive().required().messages({
-        "number.base": "L'ID dell'interazione deve essere un numero.",
-        "number.integer": "L'ID dell'interazione deve essere un numero intero.",
-        "number.positive": "L'ID dell'interazione deve essere un numero positivo."
-    })
+    id: Joi.number().integer().positive().required()
 });
 
-module.exports = { createInteractionSchema, updateInteractionSchema, deleteInteractionSchema };
+module.exports = { createInteractionSchema, updateInteractionSchema, deleteInteractionSchema, getInteractionByIdSchema };

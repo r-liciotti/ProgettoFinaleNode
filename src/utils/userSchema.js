@@ -6,4 +6,18 @@ const createUserSchema = Joi.object({
     city: Joi.string().min(3).max(255).required()
 });
 
-module.exports = { createUserSchema };
+const getUserFromIdSchema = Joi.object({
+    id: Joi.number().integer().positive().required()
+});
+
+const updateUserSchema = Joi.object({
+    nickname: Joi.string().optional(),
+    age: Joi.number().integer().min(0).optional(),
+    city: Joi.string().optional(),
+}).or('nickname', 'age', 'city');
+
+const deleteUserSchema = Joi.object({
+    id: Joi.number().integer().positive().required()
+});
+
+module.exports = { createUserSchema, getUserFromIdSchema, updateUserSchema, deleteUserSchema };

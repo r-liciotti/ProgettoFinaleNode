@@ -1,5 +1,23 @@
 const pool = require('../models/db');
-const { createInteractionSchema, updateInteractionSchema, deleteInteractionSchema } = require('../utils/interactionSchema');
+const { getInteractionByIdSchema, createInteractionSchema, updateInteractionSchema, deleteInteractionSchema } = require('../utils/interactionSchema');
+
+
+exports.getInteractionById = async (req, res) => {
+    try {
+        const { error, value } = getInteractionByIdSchema.validate(req.params, { abortEarly: false });
+        if (error) {
+            return res.error(400, { errors: error.details.map((err) => err.message) });
+        }
+        const { id } = req.params;
+        const [rows] = await pool.execute('SELECT * FROM interactions WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            return res.error(404, { error: 'Interaction not found' });
+        }
+        res.success(rows[0]);
+    } catch (error) {
+        res.error(500, { error: 'Failed to fetch interaction' });
+    }
+}
 
 exports.getAllInteractions = async (req, res) => {
     try {
@@ -12,7 +30,7 @@ exports.getAllInteractions = async (req, res) => {
 
 exports.createInteraction = async (req, res) => {
     try {
-        const { error, value } = createInteractionSchema.validate(req.query, { abortEarly: false });
+        const { error, value } = createInteractionSchema.validate(req.body, { abortEarly: false });
         if (error) {
             return res.error(400, { errors: error.details.map((err) => err.message) });
         }
@@ -35,10 +53,12 @@ exports.createInteraction = async (req, res) => {
 
 exports.updateInteraction = async (req, res) => {
     try {
-        const { id, type } = req.body;
-        if (!id || !type) {
-            return res.error(400, { error: 'id and type are required' });
+        const { error, value } = updateInteractionSchema.validate(req.body, { abortEarly: false });
+        if (error) {
+            return res.error(400, { errors: error.details.map((err) => err.message) });
         }
+
+        const { id, type } = req.body;
 
         const [result] = await pool.execute(
             'UPDATE interactions SET type = ? WHERE id = ?',
@@ -57,10 +77,12 @@ exports.updateInteraction = async (req, res) => {
 
 exports.deleteInteraction = async (req, res) => {
     try {
-        const { id } = req.body;
-        if (!id) {
-            return res.error(400, { error: 'id is required' });
+        const { error, value } = deleteInteractionSchema.validate(req.query, { abortEarly: false });
+        if (error) {
+            return res.error(400, { errors: error.details.map((err) => err.message) });
         }
+
+        const { id } = req.body;
 
         const [result] = await pool.execute('DELETE FROM interactions WHERE id = ?', [id]);
 

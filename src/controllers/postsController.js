@@ -1,5 +1,5 @@
 const pool = require('../models/db');
-const { createPostSchema, searchPostSchema } = require('../utils/postSchema');
+const { createPostSchema, searchPostSchema, allPostSchema, getPostByIdSchema, updatePostSchema } = require('../utils/postSchema');
 
 // Ottieni post con filtri di ricerca
 exports.getPostsBySearch = async (req, res) => {
@@ -65,11 +65,12 @@ exports.getPostsBySearch = async (req, res) => {
 // Ottieni tutti i post con eventuali intervalli di data
 exports.getAllPosts = async (req, res) => {
     try {
-        // Validazione input con schema di ricerca
-        const { error, value } = searchPostSchema.validate(req.query, { abortEarly: false });
+        // Validazione input con schema 
+        const { error, value } = allPostSchema.validate(req.query, { abortEarly: false });
         if (error) {
             return res.error(400, { errors: error.details.map((err) => err.message) });
         }
+
 
 
         const queryParams = [];
@@ -127,7 +128,7 @@ exports.getAllPosts = async (req, res) => {
 exports.getPostById = async (req, res) => {
     try {
         // Validazione input con schema di ricerca
-        const { error, value } = getPostByIdSchema.validate(req.query, { abortEarly: false });
+        const { error, value } = getPostByIdSchema.validate(req.params, { abortEarly: false });
         if (error) {
             return res.error(400, { errors: error.details.map((err) => err.message) });
         }
